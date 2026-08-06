@@ -24,8 +24,29 @@ export function fmt(total) {
  * Devuelve el estado actual del perro y se actualiza solo cuando Rust avisa.
  * Devuelve `null` hasta que llega el primer estado.
  */
+/**
+ * Estado de arranque. Se dibuja el perro de inmediato con estos valores y en
+ * cuanto Rust conteste se sustituyen por los de verdad. Antes esto devolvía
+ * `null` y la ventana se quedaba en blanco si algo fallaba, sin dar ninguna
+ * pista de qué había pasado.
+ */
+const INITIAL = {
+  mode: "idle",
+  timeLeft: 25 * 60,
+  pomodoros: 0,
+  hambre: 70,
+  energia: 80,
+  felicidad: 75,
+  activity: "idle",
+  dogX: 50,
+  facing: 1,
+  walkDur: 1.2,
+  msg: "",
+  demo: false,
+};
+
 export function useDogState() {
-  const [state, setState] = useState(null);
+  const [state, setState] = useState(INITIAL);
 
   useEffect(() => {
     let alive = true;
@@ -35,7 +56,11 @@ export function useDogState() {
       .then((s) => {
         if (alive) setState(s);
       })
-      .catch(() => {});
+      .catch((err) => {
+        // Que no se pierda en silencio: sin esto, un fallo aquí dejaba la
+        // ventana vacía sin ningún mensaje.
+        console.error("[deskdog] get_state falló:", err);
+      });
 
     listen("deskdog:state", (event) => {
       if (alive) setState(event.payload);

@@ -11,9 +11,13 @@ import "./styles.css";
 // Tiene que coincidir con GROUND_OFFSET en src-tauri/src/lib.rs
 const GROUND_OFFSET = 10;
 
+// TEMPORAL — pinta el contorno de la ventana y un cuadro rojo donde debería
+// estar el perro, para ver si la ventana está donde creemos. Poner en false
+// cuando el perro ya se vea.
+const DEBUG = true;
+
 function DogWindow() {
   const s = useDogState();
-  if (!s) return null;
 
   // Al hacer clic en cualquier punto de la franja, el perro camina hasta ahí.
   const handleStripClick = (e) => {
@@ -33,10 +37,31 @@ function DogWindow() {
       style={{
         position: "fixed",
         inset: 0,
-        background: "transparent",
+        background: DEBUG ? "rgba(0,120,255,0.15)" : "transparent",
+        outline: DEBUG ? "3px solid rgba(0,120,255,0.9)" : "none",
+        outlineOffset: -3,
         overflow: "hidden",
       }}
     >
+      {DEBUG && (
+        <div
+          style={{
+            position: "absolute",
+            top: 4,
+            left: 8,
+            fontFamily: "monospace",
+            fontSize: 12,
+            color: "#fff",
+            background: "rgba(0,0,0,0.65)",
+            padding: "2px 6px",
+            borderRadius: 4,
+            pointerEvents: "none",
+          }}
+        >
+          ventana {window.innerWidth}×{window.innerHeight} · perro en{" "}
+          {Math.round(s.dogX)}% · {s.activity}
+        </div>
+      )}
       {s.msg && (
         <div
           style={{
@@ -75,6 +100,10 @@ function DogWindow() {
           marginLeft: -SPRITE_W / 2,
           transition: `left ${s.walkDur}s linear`,
           cursor: "pointer",
+          // Si el recuadro rojo aparece pero el perro no, el problema son las
+          // imágenes. Si no aparece ninguno de los dos, es la ventana.
+          background: DEBUG ? "rgba(255,0,0,0.35)" : "transparent",
+          minHeight: DEBUG ? 148 : undefined,
         }}
       >
         <Dog activity={s.activity} facing={s.facing} />
