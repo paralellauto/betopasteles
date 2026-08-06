@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Deskdog</title>
     <style>
-      /* This window floats over the real desktop, so everything must be
-         see-through except the dog itself. */
       html,
       body,
       #root {
@@ -23,75 +21,90 @@
         cursor: default;
       }
 
-      /* ---- TEMPORAL, solo para depurar ------------------------------------
-         Este cartel se pinta con HTML y CSS puros, sin nada de JavaScript.
-         Si aparece, la ventana existe y está cargando la página.
-         Si no aparece, el problema está antes: en la ventana, no en el código.
-      */
-      #marca {
+      /* ---- TEMPORAL, solo para depurar --------------------------------- */
+      #pasos {
         position: fixed;
         top: 0;
         left: 0;
+        right: 0;
         z-index: 2147483647;
-        background: #00a000;
+        background: #004c99;
         color: #fff;
-        font: bold 14px monospace;
+        font: bold 13px/1.5 monospace;
         padding: 4px 10px;
-        border-radius: 0 0 6px 0;
+        white-space: pre-wrap;
       }
       #fatal {
         display: none;
         position: fixed;
-        top: 26px;
+        bottom: 0;
         left: 0;
         right: 0;
         z-index: 2147483647;
         background: #c00;
         color: #fff;
         font: bold 13px/1.45 monospace;
-        padding: 8px 12px;
+        padding: 6px 10px;
         white-space: pre-wrap;
-        max-height: 150px;
+        max-height: 120px;
         overflow: auto;
       }
     </style>
   </head>
   <body>
-    <!-- TEMPORAL: se pinta sin JavaScript. Ver el CSS de arriba. -->
-    <div id="marca">HTML OK · build 7</div>
+    <!-- TEMPORAL: los pasos se van sumando aquí y NUNCA se borran, para poder
+         leer hasta dónde llegó el código. El cartel rojo de errores es un
+         elemento aparte, así ya no pisa esta información. -->
+    <div id="pasos">build 8 · HTML OK</div>
     <div id="fatal"></div>
 
     <script>
-      // TEMPORAL: si algo del código falla, en vez de dejar la ventana en
-      // blanco lo escribimos en pantalla para poder leerlo en una captura.
       (function () {
+        var pasos = document.getElementById("pasos");
         var caja = document.getElementById("fatal");
-        var marca = document.getElementById("marca");
-        function mostrar(texto) {
+
+        window.__ddPaso = function (t) {
+          pasos.textContent += "  →  " + t;
+        };
+        function fallo(t) {
           caja.style.display = "block";
-          caja.textContent += texto + "\n";
-          marca.style.background = "#c00";
-          marca.textContent = "ERROR · build 7";
+          caja.textContent += t + "\n";
         }
-        window.addEventListener("error", function (e) {
-          mostrar(
-            "ERROR: " +
-              (e.message || e.type || "desconocido") +
-              (e.filename ? "\n  en " + e.filename + ":" + e.lineno : ""),
-          );
-        });
+        window.__ddFallo = fallo;
+
+        // ¡Con `true`! Sin la fase de captura no se detecta que un <script> no
+        // haya podido cargarse: ese error no burbujea hasta window, y por eso
+        // hasta ahora la ventana fallaba sin decir absolutamente nada.
+        window.addEventListener(
+          "error",
+          function (e) {
+            if (e.target && e.target.tagName) {
+              fallo(
+                "NO CARGO EL RECURSO: <" +
+                  e.target.tagName.toLowerCase() +
+                  "> " +
+                  (e.target.src || e.target.href || ""),
+              );
+            } else {
+              fallo(
+                "ERROR: " +
+                  (e.message || e.type) +
+                  (e.filename ? "\n  en " + e.filename + ":" + e.lineno : ""),
+              );
+            }
+          },
+          true,
+        );
+
         window.addEventListener("unhandledrejection", function (e) {
-          mostrar("PROMESA RECHAZADA: " + (e.reason && (e.reason.message || e.reason)));
+          fallo("PROMESA RECHAZADA: " + (e.reason && (e.reason.message || e.reason)));
         });
-        // Si React no ha montado nada en 3 segundos, avisamos.
+
         setTimeout(function () {
           var root = document.getElementById("root");
-          if (!root || root.children.length === 0) {
-            mostrar("React no dibujó nada en 3 segundos.");
-          } else {
-            marca.style.background = "#0060c0";
-            marca.textContent = "REACT OK · build 7";
-          }
+          pasos.textContent +=
+            "  |  #root tiene " + (root ? root.children.length : "?") + " hijos";
+          if (!root || root.children.length === 0) fallo("React no dibujó nada en 3 s.");
         }, 3000);
       })();
     </script>
