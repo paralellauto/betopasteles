@@ -566,6 +566,12 @@ pub fn run() {
                 let _ = dog.show();
                 place_dog_window(&handle, &dog);
 
+                // TEMPORAL: abre solo las herramientas de desarrollo de la
+                // ventana del perro, para poder leer los errores de la consola
+                // sin tener que buscarlas a mano.
+                #[cfg(debug_assertions)]
+                dog.open_devtools();
+
                 if let Ok(Some(m)) = dog.primary_monitor() {
                     println!(
                         "[deskdog] monitor -> {:?} {:?} escala {}",

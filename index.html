@@ -22,9 +22,80 @@
         user-select: none;
         cursor: default;
       }
+
+      /* ---- TEMPORAL, solo para depurar ------------------------------------
+         Este cartel se pinta con HTML y CSS puros, sin nada de JavaScript.
+         Si aparece, la ventana existe y está cargando la página.
+         Si no aparece, el problema está antes: en la ventana, no en el código.
+      */
+      #marca {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 2147483647;
+        background: #00a000;
+        color: #fff;
+        font: bold 14px monospace;
+        padding: 4px 10px;
+        border-radius: 0 0 6px 0;
+      }
+      #fatal {
+        display: none;
+        position: fixed;
+        top: 26px;
+        left: 0;
+        right: 0;
+        z-index: 2147483647;
+        background: #c00;
+        color: #fff;
+        font: bold 13px/1.45 monospace;
+        padding: 8px 12px;
+        white-space: pre-wrap;
+        max-height: 150px;
+        overflow: auto;
+      }
     </style>
   </head>
   <body>
+    <!-- TEMPORAL: se pinta sin JavaScript. Ver el CSS de arriba. -->
+    <div id="marca">HTML OK · build 5</div>
+    <div id="fatal"></div>
+
+    <script>
+      // TEMPORAL: si algo del código falla, en vez de dejar la ventana en
+      // blanco lo escribimos en pantalla para poder leerlo en una captura.
+      (function () {
+        var caja = document.getElementById("fatal");
+        var marca = document.getElementById("marca");
+        function mostrar(texto) {
+          caja.style.display = "block";
+          caja.textContent += texto + "\n";
+          marca.style.background = "#c00";
+          marca.textContent = "ERROR · build 5";
+        }
+        window.addEventListener("error", function (e) {
+          mostrar(
+            "ERROR: " +
+              (e.message || e.type || "desconocido") +
+              (e.filename ? "\n  en " + e.filename + ":" + e.lineno : ""),
+          );
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+          mostrar("PROMESA RECHAZADA: " + (e.reason && (e.reason.message || e.reason)));
+        });
+        // Si React no ha montado nada en 3 segundos, avisamos.
+        setTimeout(function () {
+          var root = document.getElementById("root");
+          if (!root || root.children.length === 0) {
+            mostrar("React no dibujó nada en 3 segundos.");
+          } else {
+            marca.style.background = "#0060c0";
+            marca.textContent = "REACT OK · build 5";
+          }
+        }, 3000);
+      })();
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/dog.jsx"></script>
   </body>
