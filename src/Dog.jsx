@@ -2,9 +2,13 @@
 // la animación correspondiente. Es el mismo componente del prototipo, pero
 // leyendo archivos PNG en vez de imágenes incrustadas en el código.
 
-import sitPng from "/dog/sit.png";
-import sleepPng from "/dog/sleep.png";
-import walkPng from "/dog/walk.png";
+// Las imágenes se importan desde src/assets, NO desde public/. Vite solo
+// empaqueta como módulo lo que vive dentro de src/; importar desde public/
+// parece funcionar en algunos navegadores pero falla en el webview de macOS,
+// y al fallar el import se cae el archivo entero y no se dibuja nada.
+import sitPng from "./assets/dog/sit.png";
+import sleepPng from "./assets/dog/sleep.png";
+import walkPng from "./assets/dog/walk.png";
 
 const POSES = {
   sit: sitPng,
