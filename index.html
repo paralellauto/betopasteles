@@ -58,7 +58,7 @@
   </head>
   <body>
     <!-- TEMPORAL: se pinta sin JavaScript. Ver el CSS de arriba. -->
-    <div id="marca">HTML OK · build 6</div>
+    <div id="marca">HTML OK · build 7</div>
     <div id="fatal"></div>
 
     <script>
@@ -71,7 +71,7 @@
           caja.style.display = "block";
           caja.textContent += texto + "\n";
           marca.style.background = "#c00";
-          marca.textContent = "ERROR · build 6";
+          marca.textContent = "ERROR · build 7";
         }
         window.addEventListener("error", function (e) {
           mostrar(
@@ -90,7 +90,7 @@
             mostrar("React no dibujó nada en 3 segundos.");
           } else {
             marca.style.background = "#0060c0";
-            marca.textContent = "REACT OK · build 6";
+            marca.textContent = "REACT OK · build 7";
           }
         }, 3000);
       })();

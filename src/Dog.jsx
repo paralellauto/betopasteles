@@ -2,18 +2,17 @@
 // la animación correspondiente. Es el mismo componente del prototipo, pero
 // leyendo archivos PNG en vez de imágenes incrustadas en el código.
 
-// Las imágenes se importan desde src/assets, NO desde public/. Vite solo
-// empaqueta como módulo lo que vive dentro de src/; importar desde public/
-// parece funcionar en algunos navegadores pero falla en el webview de macOS,
-// y al fallar el import se cae el archivo entero y no se dibuja nada.
-import sitPng from "./assets/dog/sit.png";
-import sleepPng from "./assets/dog/sleep.png";
-import walkPng from "./assets/dog/walk.png";
-
+// Las imágenes viven en public/ y se referencian por su dirección, SIN
+// `import`. Es justo para lo que sirve public/: Vite copia esos archivos tal
+// cual y quedan disponibles en /dog/...
+//
+// Da igual que sea dev o app compilada, y sobre todo evita que las imágenes
+// formen parte del grafo de módulos. Cuando lo eran, cualquier tropiezo de
+// Vite al cargarlas tumbaba el archivo entero y la ventana se quedaba vacía.
 const POSES = {
-  sit: sitPng,
-  sleep: sleepPng,
-  walk: walkPng,
+  sit: "/dog/sit.png",
+  sleep: "/dog/sleep.png",
+  walk: "/dog/walk.png",
 };
 
 // Las tres ilustraciones ya vienen recortadas sobre el mismo lienzo y alineadas

@@ -2,6 +2,15 @@
 // pantalla. Aquí solo vive el dálmata y su globo de diálogo; todo lo demás
 // se ve a través.
 
+// TEMPORAL: deja constancia en pantalla de hasta dónde llega el código.
+// Esta línea se ejecuta en cuanto el archivo empieza; si el cartel cambia,
+// es que el módulo sí se cargó y el problema está más adelante.
+const paso = (texto) => {
+  const m = document.getElementById("marca");
+  if (m) m.textContent = texto;
+};
+paso("MODULO EMPEZO · build 7");
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import Dog, { SPRITE_W } from "./Dog.jsx";
@@ -112,8 +121,18 @@ function DogWindow() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <DogWindow />
-  </React.StrictMode>,
-);
+// TEMPORAL: los carteles van marcando cada paso, para saber exactamente en
+// cuál se atasca si algo falla.
+paso("ANTES DE MONTAR · build 7");
+
+const raiz = document.getElementById("root");
+if (!raiz) {
+  paso("NO EXISTE #root · build 7");
+} else {
+  ReactDOM.createRoot(raiz).render(
+    <React.StrictMode>
+      <DogWindow />
+    </React.StrictMode>,
+  );
+  paso("MONTADO · build 7");
+}

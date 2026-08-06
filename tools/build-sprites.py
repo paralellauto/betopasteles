@@ -17,7 +17,7 @@ Cómo se usa (necesita Pillow: pip install Pillow):
     python3 tools/build-sprites.py
 
 Lee de   src-assets/original/
-Escribe  src-assets/  y  src/assets/dog/
+Escribe  src-assets/  y  public/dog/
 """
 
 from pathlib import Path
@@ -26,7 +26,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src-assets" / "original"
-OUT_DIRS = [ROOT / "src-assets", ROOT / "src" / "assets" / "dog"]
+OUT_DIRS = [ROOT / "src-assets", ROOT / "public" / "dog"]
 
 POSES = ["sit", "sleep", "walk"]
 
