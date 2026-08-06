@@ -1,4 +1,4 @@
-// El perro: elige la ilustración según lo que esté haciendo y le añade
+// El dálmata: elige la ilustración según lo que esté haciendo y le añade
 // la animación correspondiente. Es el mismo componente del prototipo, pero
 // leyendo archivos PNG en vez de imágenes incrustadas en el código.
 
@@ -21,7 +21,7 @@ const POSES = {
 export const SPRITE_W = 178;
 export const SPRITE_H = 148;
 
-export default function Dog({ activity, facing }) {
+export default function DogSprite({ activity, facing }) {
   const sleeping = activity === "sleep";
   const walking = activity === "walking";
   const eating = activity === "eating";

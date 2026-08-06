@@ -132,9 +132,9 @@ El archivo queda en `src-tauri/target/release/bundle/`.
 index.html            la ventana del perro (transparente)
 panel.html            la ventana del panel de control
 src/
-  dog.jsx             el perro sobre el escritorio
+  dogWindow.jsx       el perro sobre el escritorio
   panel.jsx           temporizador, estadísticas y botones
-  Dog.jsx             elige la ilustración y la animación
+  DogSprite.jsx       elige la ilustración y la animación
   state.js            puente entre Rust y la interfaz
   styles.css          las animaciones
 src-tauri/
@@ -150,9 +150,28 @@ reference/            el prototipo original, solo para consultar
 
 - los tiempos (25 / 5 min) → arriba de `src-tauri/src/lib.rs`
 - lo que dice el perro → busca `say(` en `src-tauri/src/lib.rs`
-- el tamaño del perro → `SPRITE_W` / `SPRITE_H`, en `lib.rs` **y** en `src/Dog.jsx`
-  (los dos valores tienen que coincidir)
+- el tamaño del perro → `SPRITE_W` / `SPRITE_H`, en `lib.rs` **y** en
+  `src/DogSprite.jsx` (los dos valores tienen que coincidir)
 - los colores → `src/state.js`
+
+### ⚠️ Cuidado con las mayúsculas en los nombres de archivo
+
+macOS y Windows **no distinguen mayúsculas de minúsculas** en los nombres de
+archivo; Linux sí. Dos archivos que sólo se diferencien en eso (`dog.jsx` y
+`Dog.jsx`) son **el mismo archivo** en tu Mac, aunque en GitHub se vean como dos.
+
+Nos costó una tarde entera: el import se resolvía al archivo equivocado, la
+ventana del perro se quedaba en blanco sin decir nada, y en Linux —donde se
+escribió el código— todo funcionaba, porque ahí sí son dos archivos distintos.
+
+Por eso ahora son `dogWindow.jsx` y `DogSprite.jsx`. Si añades archivos, que no
+haya dos cuyos nombres coincidan al pasarlos a minúsculas. Para comprobarlo:
+
+```
+git ls-files | tr 'A-Z' 'a-z' | sort | uniq -d
+```
+
+Si no imprime nada, no hay colisiones.
 
 ### Las ilustraciones
 

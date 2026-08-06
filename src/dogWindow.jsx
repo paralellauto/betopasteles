@@ -2,25 +2,14 @@
 // pantalla. Aquí solo vive el dálmata y su globo de diálogo; todo lo demás
 // se ve a través.
 
-// TEMPORAL: deja constancia en pantalla de hasta dónde llega el código.
-// Esta línea se ejecuta en cuanto el archivo empieza; si el cartel cambia,
-// es que el módulo sí se cargó y el problema está más adelante.
-const paso = (t) => window.__ddPaso && window.__ddPaso(t);
-paso("imports OK");
-
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Dog, { SPRITE_W } from "./Dog.jsx";
+import DogSprite, { SPRITE_W } from "./DogSprite.jsx";
 import { useDogState, dog } from "./state.js";
 import "./styles.css";
 
 // Tiene que coincidir con GROUND_OFFSET en src-tauri/src/lib.rs
 const GROUND_OFFSET = 10;
-
-// TEMPORAL — pinta el contorno de la ventana y un cuadro rojo donde debería
-// estar el perro, para ver si la ventana está donde creemos. Poner en false
-// cuando el perro ya se vea.
-const DEBUG = true;
 
 function DogWindow() {
   const s = useDogState();
@@ -43,31 +32,10 @@ function DogWindow() {
       style={{
         position: "fixed",
         inset: 0,
-        background: DEBUG ? "rgba(0,120,255,0.15)" : "transparent",
-        outline: DEBUG ? "3px solid rgba(0,120,255,0.9)" : "none",
-        outlineOffset: -3,
+        background: "transparent",
         overflow: "hidden",
       }}
     >
-      {DEBUG && (
-        <div
-          style={{
-            position: "absolute",
-            top: 4,
-            left: 8,
-            fontFamily: "monospace",
-            fontSize: 12,
-            color: "#fff",
-            background: "rgba(0,0,0,0.65)",
-            padding: "2px 6px",
-            borderRadius: 4,
-            pointerEvents: "none",
-          }}
-        >
-          ventana {window.innerWidth}×{window.innerHeight} · perro en{" "}
-          {Math.round(s.dogX)}% · {s.activity}
-        </div>
-      )}
       {s.msg && (
         <div
           style={{
@@ -106,30 +74,16 @@ function DogWindow() {
           marginLeft: -SPRITE_W / 2,
           transition: `left ${s.walkDur}s linear`,
           cursor: "pointer",
-          // Si el recuadro rojo aparece pero el perro no, el problema son las
-          // imágenes. Si no aparece ninguno de los dos, es la ventana.
-          background: DEBUG ? "rgba(255,0,0,0.35)" : "transparent",
-          minHeight: DEBUG ? 148 : undefined,
         }}
       >
-        <Dog activity={s.activity} facing={s.facing} />
+        <DogSprite activity={s.activity} facing={s.facing} />
       </div>
     </div>
   );
 }
 
-// TEMPORAL: los carteles van marcando cada paso, para saber exactamente en
-// cuál se atasca si algo falla.
-paso("antes de montar");
-
-const raiz = document.getElementById("root");
-if (!raiz) {
-  paso("NO EXISTE #root");
-} else {
-  ReactDOM.createRoot(raiz).render(
-    <React.StrictMode>
-      <DogWindow />
-    </React.StrictMode>,
-  );
-  paso("montado");
-}
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <DogWindow />
+  </React.StrictMode>,
+);

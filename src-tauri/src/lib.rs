@@ -373,15 +373,7 @@ fn place_dog_window(app: &AppHandle, dog: &WebviewWindow) -> bool {
 // Click-through: los clics atraviesan la ventana salvo cuando tocan al perro
 // ---------------------------------------------------------------------------
 
-// TEMPORAL: mientras depuramos, la ventana del perro siempre acepta clics para
-// poder abrir las herramientas de desarrollo. Poner en false para recuperar el
-// comportamiento normal.
-const DEBUG_NO_CLICK_THROUGH: bool = true;
-
 fn update_click_through(app: &AppHandle) {
-    if DEBUG_NO_CLICK_THROUGH {
-        return;
-    }
     let state = match app.try_state::<AppState>() {
         Some(s) => s,
         None => return,
@@ -556,21 +548,12 @@ pub fn run() {
 
             // Ventana del perro: franja transparente pegada abajo.
             if let Some(dog) = app.get_webview_window("dog") {
-                // TEMPORAL: sin click-through al arrancar, para poder hacer
-                // clic derecho sobre la ventana y abrir las herramientas de
-                // desarrollo. Volver a true cuando el perro ya se vea.
-                let _ = dog.set_ignore_cursor_events(false);
+                let _ = dog.set_ignore_cursor_events(true);
 
                 // Mostrar PRIMERO y colocar DESPUES: al reves, macOS descarta
                 // la posicion que le pedimos.
                 let _ = dog.show();
                 place_dog_window(&handle, &dog);
-
-                // TEMPORAL: abre solo las herramientas de desarrollo de la
-                // ventana del perro, para poder leer los errores de la consola
-                // sin tener que buscarlas a mano.
-                #[cfg(debug_assertions)]
-                dog.open_devtools();
 
                 if let Ok(Some(m)) = dog.primary_monitor() {
                     println!(

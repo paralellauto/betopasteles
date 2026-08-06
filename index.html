@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Deskdog</title>
     <style>
+      /* Esta ventana flota sobre el escritorio de verdad, así que todo tiene
+         que ser transparente menos el propio perro. */
       html,
       body,
       #root {
@@ -21,19 +23,7 @@
         cursor: default;
       }
 
-      /* ---- TEMPORAL, solo para depurar --------------------------------- */
-      #pasos {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 2147483647;
-        background: #004c99;
-        color: #fff;
-        font: bold 13px/1.5 monospace;
-        padding: 4px 10px;
-        white-space: pre-wrap;
-      }
+      /* Sólo aparece si algo falla. Ver el comentario de abajo. */
       #fatal {
         display: none;
         position: fixed;
@@ -52,64 +42,37 @@
     </style>
   </head>
   <body>
-    <!-- TEMPORAL: los pasos se van sumando aquí y NUNCA se borran, para poder
-         leer hasta dónde llegó el código. El cartel rojo de errores es un
-         elemento aparte, así ya no pisa esta información. -->
-    <div id="pasos">build 8 · HTML OK</div>
     <div id="fatal"></div>
 
     <script>
-      (function () {
-        var pasos = document.getElementById("pasos");
-        var caja = document.getElementById("fatal");
-
-        window.__ddPaso = function (t) {
-          pasos.textContent += "  →  " + t;
-        };
-        function fallo(t) {
+      // Esta ventana no tiene barra de título ni consola a la vista: si algo
+      // falla, sin esto se queda simplemente en blanco y no hay forma de saber
+      // por qué. Nos costó media tarde averiguarlo. Ahora el error se escribe
+      // en la propia ventana.
+      //
+      // El `true` del final es importante: activa la fase de captura. Cuando un
+      // <script> no consigue cargarse, ese error no burbujea hasta window y sin
+      // la captura pasaría desapercibido.
+      window.addEventListener(
+        "error",
+        function (e) {
+          var caja = document.getElementById("fatal");
           caja.style.display = "block";
-          caja.textContent += t + "\n";
-        }
-        window.__ddFallo = fallo;
-
-        // ¡Con `true`! Sin la fase de captura no se detecta que un <script> no
-        // haya podido cargarse: ese error no burbujea hasta window, y por eso
-        // hasta ahora la ventana fallaba sin decir absolutamente nada.
-        window.addEventListener(
-          "error",
-          function (e) {
-            if (e.target && e.target.tagName) {
-              fallo(
-                "NO CARGO EL RECURSO: <" +
-                  e.target.tagName.toLowerCase() +
-                  "> " +
-                  (e.target.src || e.target.href || ""),
-              );
-            } else {
-              fallo(
-                "ERROR: " +
-                  (e.message || e.type) +
-                  (e.filename ? "\n  en " + e.filename + ":" + e.lineno : ""),
-              );
-            }
-          },
-          true,
-        );
-
-        window.addEventListener("unhandledrejection", function (e) {
-          fallo("PROMESA RECHAZADA: " + (e.reason && (e.reason.message || e.reason)));
-        });
-
-        setTimeout(function () {
-          var root = document.getElementById("root");
-          pasos.textContent +=
-            "  |  #root tiene " + (root ? root.children.length : "?") + " hijos";
-          if (!root || root.children.length === 0) fallo("React no dibujó nada en 3 s.");
-        }, 3000);
-      })();
+          caja.textContent +=
+            (e.target && e.target.tagName
+              ? "No cargó: <" +
+                e.target.tagName.toLowerCase() +
+                "> " +
+                (e.target.src || e.target.href || "")
+              : "Error: " +
+                (e.message || e.type) +
+                (e.filename ? "  (" + e.filename + ":" + e.lineno + ")" : "")) + "\n";
+        },
+        true,
+      );
     </script>
 
     <div id="root"></div>
-    <script type="module" src="/src/dog.jsx"></script>
+    <script type="module" src="/src/dogWindow.jsx"></script>
   </body>
 </html>
