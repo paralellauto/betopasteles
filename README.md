@@ -53,13 +53,16 @@ instalada — reinstálala y vuelve a abrir la Terminal.
 ### 3. Bájate el proyecto
 
 ```
-git clone https://github.com/paralellauto/betopasteles.git
+git clone -b claude/deskdog-tauri-desktop-84yylp https://github.com/paralellauto/betopasteles.git
 ```
 ```
 cd betopasteles
 ```
 
-`git clone` copia el proyecto de GitHub a tu computadora.
+`git clone` copia el proyecto de GitHub a tu computadora. El trozo
+`-b claude/deskdog-tauri-desktop-84yylp` le dice de qué **rama** bajarlo: el
+código vive ahí, no en la principal. Sin esa parte te bajarías la carpeta vacía.
+
 `cd` significa "entra en esa carpeta".
 
 ### 4. Instala las piezas del proyecto
