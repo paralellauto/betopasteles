@@ -312,22 +312,35 @@ fn hide_panel(app: AppHandle) {
 // Colocar la ventana del perro pegada al borde inferior de la pantalla
 // ---------------------------------------------------------------------------
 
-fn place_dog_window(app: &AppHandle, dog: &WebviewWindow) {
+/// Estira la ventana del perro a lo ancho de la pantalla y la pega abajo.
+///
+/// Devuelve `true` si la ventana quedó donde le pedimos.
+///
+/// Ojo: en macOS, colocar una ventana que todavía está oculta no funciona; el
+/// sistema la vuelve a colocar a su manera al mostrarla y descarta lo que le
+/// pedimos. Por eso esto se llama DESPUÉS de `show()`, y varias veces, hasta
+/// que el sistema hace caso.
+fn place_dog_window(app: &AppHandle, dog: &WebviewWindow) -> bool {
     let monitor = match dog.primary_monitor() {
         Ok(Some(m)) => m,
-        _ => return,
+        _ => {
+            println!("[deskdog] AVISO: no se pudo leer el monitor principal");
+            return false;
+        }
     };
     let size = monitor.size();
     let pos = monitor.position();
     let scale = monitor.scale_factor();
 
     let strip_h_px = (STRIP_H * scale).round() as u32;
-
-    let _ = dog.set_size(PhysicalSize::new(size.width, strip_h_px));
-    let _ = dog.set_position(PhysicalPosition::new(
+    let target_size = PhysicalSize::new(size.width, strip_h_px);
+    let target_pos = PhysicalPosition::new(
         pos.x,
         pos.y + size.height as i32 - strip_h_px as i32,
-    ));
+    );
+
+    let _ = dog.set_size(target_size);
+    let _ = dog.set_position(target_pos);
 
     if let Some(state) = app.try_state::<AppState>() {
         *state.screen.lock().unwrap() = Screen {
@@ -335,6 +348,24 @@ fn place_dog_window(app: &AppHandle, dog: &WebviewWindow) {
             height: size.height as f64,
             scale,
         };
+    }
+
+    // ¿Nos hizo caso? Toleramos unos pocos píxeles de diferencia: algunos
+    // sistemas ajustan la ventana para no tapar barras o bordes.
+    match (dog.outer_position(), dog.outer_size()) {
+        (Ok(p), Ok(sz)) => {
+            let ok = (p.x - target_pos.x).abs() <= 4
+                && (p.y - target_pos.y).abs() <= 4
+                && sz.width.abs_diff(target_size.width) <= 4;
+            if !ok {
+                println!(
+                    "[deskdog] la ventana no obedecio todavia: pedimos {:?}/{:?}, quedo {:?}/{:?}",
+                    target_pos, target_size, p, sz
+                );
+            }
+            ok
+        }
+        _ => false,
     }
 }
 
@@ -525,32 +556,46 @@ pub fn run() {
 
             // Ventana del perro: franja transparente pegada abajo.
             if let Some(dog) = app.get_webview_window("dog") {
-                place_dog_window(&handle, &dog);
                 // TEMPORAL: sin click-through al arrancar, para poder hacer
                 // clic derecho sobre la ventana y abrir las herramientas de
                 // desarrollo. Volver a true cuando el perro ya se vea.
                 let _ = dog.set_ignore_cursor_events(false);
-                let _ = dog.show();
 
-                // Deja constancia en la terminal de donde acabo la ventana.
-                if let (Ok(pos), Ok(size)) = (dog.outer_position(), dog.outer_size()) {
-                    println!(
-                        "[deskdog] ventana del perro -> posicion {:?}  tamano {:?}  visible={:?}",
-                        pos,
-                        size,
-                        dog.is_visible()
-                    );
-                }
+                // Mostrar PRIMERO y colocar DESPUES: al reves, macOS descarta
+                // la posicion que le pedimos.
+                let _ = dog.show();
+                place_dog_window(&handle, &dog);
+
                 if let Ok(Some(m)) = dog.primary_monitor() {
                     println!(
-                        "[deskdog] monitor -> posicion {:?}  tamano {:?}  escala {}",
+                        "[deskdog] monitor -> {:?} {:?} escala {}",
                         m.position(),
                         m.size(),
                         m.scale_factor()
                     );
-                } else {
-                    println!("[deskdog] AVISO: no se pudo leer el monitor principal");
                 }
+
+                // El sistema puede recolocar la ventana justo despues de
+                // mostrarla, asi que insistimos durante el primer segundo.
+                let h = handle.clone();
+                std::thread::spawn(move || {
+                    for intento in 1..=10 {
+                        std::thread::sleep(Duration::from_millis(100));
+                        let Some(d) = h.get_webview_window("dog") else {
+                            return;
+                        };
+                        if place_dog_window(&h, &d) {
+                            if let (Ok(p), Ok(sz)) = (d.outer_position(), d.outer_size()) {
+                                println!(
+                                    "[deskdog] ventana colocada al intento {}: {:?} {:?}",
+                                    intento, p, sz
+                                );
+                            }
+                            return;
+                        }
+                    }
+                    println!("[deskdog] AVISO: la ventana del perro nunca acepto la posicion");
+                });
             }
 
             // --- Icono en la barra del sistema ------------------------------
