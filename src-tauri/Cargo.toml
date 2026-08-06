@@ -1,0 +1,29 @@
+[package]
+name = "deskdog"
+version = "0.1.0"
+description = "Deskdog — un dálmata que te acompaña mientras trabajas"
+authors = ["Eduardo"]
+edition = "2021"
+
+[lib]
+name = "deskdog_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [
+    "tray-icon",
+    "image-png",
+    # Necesario para que la ventana del perro sea realmente transparente en macOS.
+    "macos-private-api",
+] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

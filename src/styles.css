@@ -1,0 +1,48 @@
+/* Animaciones del perro, compartidas por las dos ventanas. */
+
+@keyframes dd-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes dd-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes dd-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.03);
+  }
+}
+
+@keyframes dd-nibble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-2.5deg);
+  }
+}
+
+/* Si el sistema pide menos movimiento, el perro se queda quieto. */
+@media (prefers-reduced-motion: reduce) {
+  .dd-dog {
+    animation: none !important;
+  }
+}
