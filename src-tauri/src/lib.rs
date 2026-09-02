@@ -33,7 +33,7 @@ const SPRITE_H: f64 = 148.0;
 // Alto de la franja transparente que ocupa el borde inferior de la pantalla.
 // Tiene que dar cabida al perro (148) MAS el globo de dialogo encima, que puede
 // ocupar tres lineas. Con 200 el globo se salia por arriba y quedaba cortado.
-const STRIP_H: f64 = 300.0;
+const STRIP_H: f64 = 340.0;
 // Cuanto se levanta el perro respecto al borde inferior (deja aire para el Dock)
 const GROUND_OFFSET: f64 = 10.0;
 // Aire minimo entre el borde de la pantalla y lo que se dibuja.
@@ -404,18 +404,25 @@ fn update_click_through(app: &AppHandle) {
         return;
     }
 
-    // En el descanso toda la franja responde, para poder señalar a donde caminar.
-    if mode == "break" {
-        let _ = dog_win.set_ignore_cursor_events(false);
-        return;
-    }
-
-    // El resto del tiempo solo el perro captura clics.
     let cursor = match app.cursor_position() {
         Ok(c) => c,
         Err(_) => return,
     };
 
+    // En el descanso se puede señalar a donde caminar, pero solo responde la
+    // banda de abajo, a la altura del perro. El globo de dialogo flota mas
+    // arriba: si toda la franja capturase clics, el globo se los tragaria y
+    // no llegarian al escritorio.
+    if mode == "break" {
+        // Justo la altura del perro: asi la banda termina donde empieza el
+        // globo y no se solapan.
+        let banda = (GROUND_OFFSET + SPRITE_H) * screen.scale;
+        let en_la_banda = cursor.y >= screen.height - banda;
+        let _ = dog_win.set_ignore_cursor_events(!en_la_banda);
+        return;
+    }
+
+    // El resto del tiempo solo el perro captura clics.
     let sprite_w = SPRITE_W * screen.scale;
     let sprite_h = SPRITE_H * screen.scale;
     let ground = GROUND_OFFSET * screen.scale;
