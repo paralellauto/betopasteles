@@ -153,6 +153,15 @@ reference/            el prototipo original, solo para consultar
 - el tamaño del perro → `SPRITE_W` / `SPRITE_H`, en `lib.rs` **y** en
   `src/DogSprite.jsx` (los dos valores tienen que coincidir)
 - los colores → `src/state.js`
+- el alto de la franja transparente → `STRIP_H` en `lib.rs` (tiene que caber el
+  perro **más** el globo de diálogo encima)
+
+Hay cuatro valores que viven a la vez en `src-tauri/src/lib.rs` y en
+`src/dogWindow.jsx` / `src/DogSprite.jsx`, y **tienen que coincidir**:
+`SPRITE_W`, `SPRITE_H`, `GROUND_OFFSET` y `MARGEN`. Rust los usa para saber
+dónde está el perro y decidir si un clic es para él; la interfaz los usa para
+dibujarlo. Si se separan, Beto responde a los clics en un sitio distinto de
+donde se ve.
 
 ### ⚠️ Cuidado con las mayúsculas en los nombres de archivo
 

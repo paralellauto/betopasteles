@@ -30,10 +30,15 @@ const BREAK_DEMO: u32 = 12;
 // Tamano del perro en pantalla (pixeles logicos, como en el prototipo)
 const SPRITE_W: f64 = 178.0;
 const SPRITE_H: f64 = 148.0;
-// Alto de la franja transparente que ocupa el borde inferior de la pantalla
-const STRIP_H: f64 = 200.0;
+// Alto de la franja transparente que ocupa el borde inferior de la pantalla.
+// Tiene que dar cabida al perro (148) MAS el globo de dialogo encima, que puede
+// ocupar tres lineas. Con 200 el globo se salia por arriba y quedaba cortado.
+const STRIP_H: f64 = 300.0;
 // Cuanto se levanta el perro respecto al borde inferior (deja aire para el Dock)
 const GROUND_OFFSET: f64 = 10.0;
+// Aire minimo entre el borde de la pantalla y lo que se dibuja.
+// Tiene que coincidir con MARGEN en src/dogWindow.jsx
+const MARGEN: f64 = 8.0;
 
 // ---------------------------------------------------------------------------
 // El estado del perro
@@ -415,7 +420,15 @@ fn update_click_through(app: &AppHandle) {
     let sprite_h = SPRITE_H * screen.scale;
     let ground = GROUND_OFFSET * screen.scale;
 
-    let center_x = dog_x / 100.0 * screen.width;
+    // La interfaz mantiene al perro dentro de la pantalla cuando llega a un
+    // extremo; aqui hay que aplicar el mismo limite, si no el rectangulo que
+    // captura los clics se desplazaria respecto a donde se ve dibujado.
+    let media = sprite_w / 2.0 + MARGEN * screen.scale;
+    let center_x = if screen.width < sprite_w + MARGEN * 2.0 * screen.scale {
+        screen.width / 2.0
+    } else {
+        (dog_x / 100.0 * screen.width).clamp(media, screen.width - media)
+    };
     let left = center_x - sprite_w / 2.0;
     let right = center_x + sprite_w / 2.0;
     let bottom = screen.height - ground;
