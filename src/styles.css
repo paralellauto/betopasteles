@@ -1,13 +1,21 @@
 /* Animaciones del perro, compartidas por las dos ventanas. */
 
-@keyframes dd-bob {
-  0%,
-  100% {
-    transform: translateY(0);
+/* Caminata: recorre la tira de 8 fotogramas.
+   El -1424px = SPRITE_W (178) x WALK_FRAMES (8), en src/DogSprite.jsx.
+   Si cambias cualquiera de los dos, cambia también este número. */
+@keyframes dd-walk {
+  from {
+    background-position-x: 0;
   }
-  50% {
-    transform: translateY(-4px);
+  to {
+    background-position-x: -1424px;
   }
+}
+
+.dd-walk {
+  /* `steps(8)` salta de fotograma a fotograma en seco, sin fundido: eso es lo
+     que da el aire de videojuego en vez de un deslizamiento suave. */
+  animation: dd-walk 0.5s steps(8) infinite;
 }
 
 @keyframes dd-bounce {

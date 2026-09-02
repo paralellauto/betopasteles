@@ -40,6 +40,18 @@ const GROUND_OFFSET: f64 = 10.0;
 // Tiene que coincidir con MARGEN en src/dogWindow.jsx
 const MARGEN: f64 = 8.0;
 
+// A que velocidad camina, en pixeles por segundo.
+//
+// El prototipo usaba un porcentaje del ancho por segundo, pero eso hace que en
+// una pantalla grande el perro salga disparado: en un monitor de 2560 px eran
+// 717 px/s. Fijandolo en pixeles camina igual en cualquier pantalla, y el
+// ritmo de las patas cuadra con lo que avanza.
+//
+// Si quieres que vaya mas rapido o mas lento, este es el numero. Al cambiarlo,
+// ajusta tambien la duracion de `.dd-walk` en src/styles.css para que las
+// patas sigan el mismo compas.
+const SPEED_PX_S: f64 = 200.0;
+
 // ---------------------------------------------------------------------------
 // El estado del perro
 // ---------------------------------------------------------------------------
@@ -274,7 +286,17 @@ fn walk_to(app: AppHandle, state: tauri::State<AppState>, x: f64) {
         return;
     }
     s.facing = if target > s.dog_x { 1 } else { -1 };
-    s.walk_dur = (dist / 28.0).max(0.5);
+
+    // `dist` va en porcentaje del ancho: se pasa a pixeles para que la
+    // velocidad no dependa del tamano de la pantalla.
+    let screen = *state.screen.lock().unwrap();
+    let ancho_logico = if screen.scale > 0.0 {
+        screen.width / screen.scale
+    } else {
+        1280.0
+    };
+    let dist_px = dist / 100.0 * ancho_logico;
+    s.walk_dur = (dist_px / SPEED_PX_S).max(0.35);
     s.activity = "walking".into();
     s.dog_x = target;
     s.felicidad = clamp(s.felicidad + 4.0);

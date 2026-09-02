@@ -1,25 +1,27 @@
-// El dálmata: elige la ilustración según lo que esté haciendo y le añade
-// la animación correspondiente. Es el mismo componente del prototipo, pero
-// leyendo archivos PNG en vez de imágenes incrustadas en el código.
+// El dálmata: elige la ilustración según lo que esté haciendo y le añade la
+// animación correspondiente.
+//
+// Sentado, dormido y comiendo son un dibujo fijo. Caminar NO: usa una tira de
+// ocho fotogramas (public/dog/walk-sheet.png) que se reproduce en bucle, como
+// en un videojuego. La tira la genera tools/build-walk-cycle.py a partir de la
+// misma ilustración, doblándole las patas.
 
 // Las imágenes viven en public/ y se referencian por su dirección, SIN
-// `import`. Es justo para lo que sirve public/: Vite copia esos archivos tal
-// cual y quedan disponibles en /dog/...
-//
-// Da igual que sea dev o app compilada, y sobre todo evita que las imágenes
-// formen parte del grafo de módulos. Cuando lo eran, cualquier tropiezo de
-// Vite al cargarlas tumbaba el archivo entero y la ventana se quedaba vacía.
+// `import`. Es justo para lo que sirve public/.
 const POSES = {
   sit: "/dog/sit.png",
   sleep: "/dog/sleep.png",
-  walk: "/dog/walk.png",
 };
 
-// Las tres ilustraciones ya vienen recortadas sobre el mismo lienzo y alineadas
-// al mismo suelo, así que todas se dibujan del mismo tamaño y el perro nunca
+// Las ilustraciones vienen recortadas sobre el mismo lienzo y alineadas al
+// mismo suelo, así que todas se dibujan del mismo tamaño y el perro nunca
 // "salta" al cambiar de postura.
 export const SPRITE_W = 178;
 export const SPRITE_H = 148;
+
+// Fotogramas de la tira de caminata. Si cambia, hay que actualizar también
+// --dd-pasos y la anchura en el @keyframes dd-walk de styles.css.
+export const WALK_FRAMES = 8;
 
 export default function DogSprite({ activity, facing }) {
   const sleeping = activity === "sleep";
@@ -27,17 +29,8 @@ export default function DogSprite({ activity, facing }) {
   const eating = activity === "eating";
   const happy = activity === "happy";
 
-  const pose = sleeping ? "sleep" : walking ? "walk" : "sit";
-
-  const animation = walking
-    ? "dd-bob 0.4s infinite"
-    : happy
-      ? "dd-bounce 0.55s infinite"
-      : eating
-        ? "dd-nibble 0.4s infinite"
-        : sleeping
-          ? "dd-breathe 3.2s infinite"
-          : "none";
+  // Sombra suave: despega al perro del escritorio sin ensuciar el estilo.
+  const sombra = "drop-shadow(0 2px 3px rgba(28,27,24,0.18))";
 
   return (
     <div
@@ -49,22 +42,42 @@ export default function DogSprite({ activity, facing }) {
         transition: "transform 0.25s",
       }}
     >
-      <img
-        src={POSES[pose]}
-        alt=""
-        draggable={false}
-        className="dd-dog"
-        style={{
-          width: SPRITE_W,
-          height: SPRITE_H,
-          display: "block",
-          animation,
-          transformOrigin: "50% 100%",
-          // El dálmata es línea negra sobre fondo transparente: una sombra
-          // suave lo despega del escritorio sin ensuciar el estilo.
-          filter: "drop-shadow(0 2px 3px rgba(28,27,24,0.18))",
-        }}
-      />
+      {walking ? (
+        // Caminando: la tira de fotogramas. `steps()` hace que salte de uno a
+        // otro en seco, sin fundido, que es lo que da el aire de videojuego.
+        <div
+          className="dd-dog dd-walk"
+          style={{
+            width: SPRITE_W,
+            height: SPRITE_H,
+            backgroundImage: "url(/dog/walk-sheet.png)",
+            backgroundSize: `${SPRITE_W * WALK_FRAMES}px ${SPRITE_H}px`,
+            backgroundRepeat: "no-repeat",
+            filter: sombra,
+          }}
+        />
+      ) : (
+        <img
+          src={sleeping ? POSES.sleep : POSES.sit}
+          alt=""
+          draggable={false}
+          className="dd-dog"
+          style={{
+            width: SPRITE_W,
+            height: SPRITE_H,
+            display: "block",
+            animation: happy
+              ? "dd-bounce 0.55s infinite"
+              : eating
+                ? "dd-nibble 0.4s infinite"
+                : sleeping
+                  ? "dd-breathe 3.2s infinite"
+                  : "none",
+            transformOrigin: "50% 100%",
+            filter: sombra,
+          }}
+        />
+      )}
 
       {sleeping && (
         <div

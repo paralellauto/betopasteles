@@ -79,8 +79,12 @@ def main() -> None:
                     px[x, y] = (0, 0, 0, 0)
 
         final = canvas.resize((out_w, OUTPUT_HEIGHT), Image.LANCZOS)
-        for out_dir in OUT_DIRS:
-            final.save(out_dir / f"{name}.png", optimize=True)
+        final.save(ROOT / "src-assets" / f"{name}.png", optimize=True)
+        # La pose de caminar ya no se usa suelta: la sustituye la tira de
+        # fotogramas que genera tools/build-walk-cycle.py. Se sigue guardando en
+        # src-assets como referencia, pero no hace falta servirla a la app.
+        if name != "walk":
+            final.save(ROOT / "public" / "dog" / f"{name}.png", optimize=True)
         print(f"  {name:<6} listo")
 
     print("\nSi cambias OUTPUT_HEIGHT, actualiza también SPRITE_W / SPRITE_H")

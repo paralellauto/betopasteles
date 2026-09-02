@@ -142,7 +142,9 @@ src-tauri/
                          guardado en disco y click-through
   tauri.conf.json     configuración de las dos ventanas
 src-assets/           las 3 ilustraciones ya recortadas y alineadas
-public/dog/           las mismas, servidas a la app
+public/dog/           lo que consume la app: sit.png, sleep.png y la tira
+                      de caminata walk-sheet.png (8 fotogramas)
+tools/                los dos generadores de imágenes
 reference/            el prototipo original, solo para consultar
 ```
 
@@ -153,6 +155,10 @@ reference/            el prototipo original, solo para consultar
 - el tamaño del perro → `SPRITE_W` / `SPRITE_H`, en `lib.rs` **y** en
   `src/DogSprite.jsx` (los dos valores tienen que coincidir)
 - los colores → `src/state.js`
+- la velocidad al caminar → `SPEED_PX_S` en `lib.rs` (200 px por segundo)
+- el ritmo de las patas → la duración de `.dd-walk` en `src/styles.css` (0.5 s
+  por zancada). Si cambias la velocidad, cambia esto en la misma proporción o
+  parecerá que patina
 - el alto de la franja transparente → `STRIP_H` en `lib.rs` (tiene que caber el
   perro **más** el globo de diálogo encima)
 
@@ -187,5 +193,38 @@ Si no imprime nada, no hay colisiones.
 Las tres poses (sentado, dormido, caminando) venían en distintas posiciones
 dentro de su lienzo, así que el perro habría dado un salto al cambiar de postura.
 Ahora están recortadas sobre un lienzo común y apoyadas en la misma línea de
-suelo, y se dibujan todas al mismo tamaño. Si algún día cambias los PNG, hay que
-volver a alinearlos igual.
+suelo, y se dibujan todas al mismo tamaño.
+
+Hay dos generadores, y si cambias los PNG originales hay que pasar **los dos**:
+
+```
+python3 tools/build-sprites.py       # recorta y alinea sentado y dormido
+python3 tools/build-walk-cycle.py    # monta la tira de caminata
+```
+
+### El ciclo de caminata
+
+Beto no se desliza: camina. La tira `walk-sheet.png` son ocho fotogramas que se
+reproducen en bucle, como en un videojuego.
+
+No hay ningún dibujo nuevo. El generador coge tu ilustración de caminar, localiza
+las cuatro patas (por debajo de cierta altura cada fila de píxeles se parte en
+cuatro tramos separados) y las va doblando fotograma a fotograma. El doblez
+crece cuanto más abajo está: cero en la cadera, máximo en la pezuña. Por eso la
+pata se curva en lugar de partirse y no queda ninguna costura.
+
+Las patas van en diagonal, como camina un perro de verdad: la delantera de un
+lado con la trasera del otro. Y el cuerpo sube y baja dos veces por zancada, que
+es lo que da sensación de peso.
+
+Para tocarlo, en `tools/build-walk-cycle.py`:
+
+| Valor | Qué hace |
+|---|---|
+| `SWING` | Cuánto se abren las patas. Más alto = zancada más larga |
+| `BOB_CSS` | Cuánto sube y baja el cuerpo |
+| `PIVOT` | Desde qué altura empiezan a doblarse las patas |
+| `FRAMES` | Número de fotogramas (si lo cambias, actualiza `styles.css`) |
+
+El script deja una vista previa en `/tmp/walk-preview.png` y un GIF en
+`/tmp/walk.gif` para revisar el resultado antes de nada.
