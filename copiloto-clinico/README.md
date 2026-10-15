@@ -4,7 +4,10 @@ Prototipo funcional del concepto "Copiloto clínico para psicólogos" para el pi
 la psicóloga pega en el panel cada mensaje de WhatsApp del paciente, la asistente (Claude) clasifica el
 nivel de riesgo y redacta una respuesta, y la psicóloga aprueba cada mensaje antes de enviarlo.
 
-Se publica como un Artifact de claude.ai (un solo archivo HTML: `dist/copiloto-clinico.html`).
+Se publica como un Artifact de claude.ai (un solo archivo HTML: `dist/copiloto-clinico.html`):
+https://claude.ai/artifact/QEz6jwrSpj6VFchbC21Zpi
+
+Capacidades declaradas: `db` (regla raíz: leer y escribir desde Colaborador), `user`, `sample` y `downloads`.
 
 ## Qué incluye
 
@@ -18,7 +21,7 @@ Se publica como un Artifact de claude.ai (un solo archivo HTML: `dist/copiloto-c
 ## Seguridad clínica
 
 - Una red de palabras clave (`screenRisk`, versión `red-3`) corre siempre, sin IA. Si marca riesgo alto, la alerta suena
-  y se muestra aunque la IA falle, la base de datos falle o la IA diga otra cosa. Regresión: `node test/risk-regression.mjs` (174 frases).
+  y se muestra aunque la IA falle, la base de datos falle o la IA diga otra cosa. Regresión: `node test/risk-regression.mjs` (175 frases, 0 falsos negativos).
 - La IA nunca baja un riesgo alto por sí sola; solo la psicóloga puede bajarlo.
 - Una alerta escala después de X minutos si nadie responde al mensaje de crisis o marca "Ya contacté al paciente".
 

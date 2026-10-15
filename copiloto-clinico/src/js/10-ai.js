@@ -59,7 +59,7 @@ const RISK_RULES = [
   { nivel: 'riesgo_alto', cat: 'terceros', re: /\bse quiere (matar|morir|suicidar)/ },
   // Malestar
   { nivel: 'malestar', cat: 'medios_mencionados', re: /\b(pastillas|cuchillo|navaja|pistola|arma|soga)\b/ },
-  { nivel: 'malestar', cat: 'panico', re: /\b(ataques? de panico|no puedo respirar|me falta el aire|siento que me muero|taquicardia|me voy a desmayar|me estoy ahogando|me tiembla todo)/ },
+  { nivel: 'malestar', cat: 'panico', re: /\b(ataques? de panico|no puedo respirar|me falta el aire|siento que me muero|siento que (me )?voy a morir|voy a morir pronto|taquicardia|me voy a desmayar|me estoy ahogando|me tiembla todo)/ },
   { nivel: 'malestar', cat: 'ansiedad', re: /\b(ansiedad|ansios[oa]|angustia|angustiad[oa]|temblando|no puedo calmarme|muy nervios[oa])/ },
   { nivel: 'malestar', cat: 'llanto', re: /\b(llorando|no paro de llorar|no puedo dejar de llorar|llore toda|no dejo de llorar)/ },
   { nivel: 'malestar', cat: 'animo', re: /\b(desesperad[oa]|me siento (fatal|horrible|muy mal|vaci[oa]|sol[oa]|de la verga|de la chingada|de la fregada)|estoy (muy mal|fatal|de la chingada|de la verga|de la fregada|bien mal|hecho mierda|hecha mierda)|bajonead[oa]|no puedo mas|ya no aguanto|estoy en crisis|tengo una crisis|me dio una crisis|estoy teniendo una crisis)/ }
